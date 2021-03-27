@@ -34,8 +34,7 @@ new_Process(unsigned int time_arrived, unsigned int process_ID, unsigned int exe
     process->process_ID = process_ID;
     process->execution_time = execution_time;
     process->remaining_time = execution_time;
-    process->next = NULL;
-    process->prev = NULL;
+    process->next = process->prev = process->parent_process = NULL;
 
     return process;
 }
@@ -62,14 +61,18 @@ free_Process(Process *process)
     process->prev = NULL;
     process->parent_process = NULL;
     free(process);
-    process = NULL;
 }
 
 void 
-execute_Process(Process *process, unsigned int time) 
+execute_Process(Process *process, unsigned int running_time) 
 {
+    printf("executing process for running time of %d \n", running_time);
     if (!process) exit_with_error("Error in execute_Process(): pointer to process is NULL.");
-    process->remaining_time -= time;
+    if (process->remaining_time < running_time) 
+    {
+        exit_with_error("Error in execute_Process(): cannot execute for longer than remaining_time.");
+    }
+    process->remaining_time -= running_time;
 }
 
 int
@@ -83,6 +86,7 @@ compare_Processes(Process *process_1, Process *process_2)
     if (process_1->process_ID < process_2->process_ID) return -1;
     if (process_1->process_ID > process_2->process_ID) return +1;
 
+    exit_with_error("Error in compare_Processes(): processes shouldn't be equal.");
     return 0;
 }
 
