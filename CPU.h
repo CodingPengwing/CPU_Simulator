@@ -1,4 +1,5 @@
 #include "process.h"
+#include "queue.h"
 #include "util.h"
 
 #ifndef CPU_H
@@ -8,9 +9,7 @@ typedef struct cpu CPU;
 struct cpu 
 {
     unsigned int CPU_ID;
-    unsigned int num_processes;
-    Process *head;
-    Process *tail;
+    Queue_t *process_queue;
 };
 
 CPU *
@@ -18,9 +17,8 @@ new_CPU(unsigned int CPU_ID)
 {
     CPU *cpu = (CPU*) malloc(sizeof(CPU));
     if (!cpu) exit_with_error("Error in new_CPU(): failed to malloc CPU.");
+    cpu->process_queue = new_Queue();
     cpu->CPU_ID = CPU_ID;
-    cpu->num_processes = 0;
-    cpu->head = cpu->tail = NULL;
     return cpu;
 }
 
@@ -28,43 +26,49 @@ void
 free_CPU(CPU *cpu) 
 {
     if (!cpu) exit_with_error("Error in free_CPU(): pointer to cpu is NULL");
-    if (cpu->num_processes) fprintf(stderr, "Error in free_CPU(): freeing CPU with pending processes.");
+    if (cpu->process_queue->size) fprintf(stderr, "Error in free_CPU(): freeing CPU with pending processes.");
     
-    cpu->head = cpu->tail = NULL;
+    free_Queue(cpu->process_queue);
+    cpu->process_queue = NULL;
     free(cpu);
 }
 
-void 
-add_Process_to_CPU(CPU *cpu, Process *new_process) 
+void
+print_CPU(CPU *cpu) 
 {
-    if (!cpu || !new_process) exit_with_error("Error in pop_Process_from_CPU(): pointer given is NULL");
+    if (!cpu) exit_with_error("Error in print_CPU(): pointer to cpu is NULL");
+    printf("CPU number: %u \n", cpu->CPU_ID);
+    print_Queue(cpu->process_queue);
+}
 
-    if (cpu->num_processes == 0) 
+void 
+assign_Process_to_CPU(CPU *cpu, Process_t *new_process) 
+{
+    if (!cpu || !cpu->process_queue || !new_process) 
+    exit_with_error("Error in add_Process_from_CPU(): pointer given is NULL");
+
+    new_process->next = new_process->prev = NULL;
+
+    if (cpu->process_queue->size == 0) 
     {
-        cpu->head = cpu->tail = new_process;
-        cpu->num_processes++;
+        insert_Queue(cpu->process_queue, new_process);
+        return;
+    }
+
+    if (compare_Processes(new_process, cpu->process_queue->tail) > 0)
+    {
+        insert_Queue(cpu->process_queue, new_process);
         return;
     }
     
-    if (compare_Processes(new_process, cpu->head) < 0) 
+    if (compare_Processes(new_process, cpu->process_queue->head) < 0) 
     {
-        new_process->next = cpu->head;
-        cpu->head->prev = new_process;
-        cpu->head = new_process;
-        cpu->num_processes++;
+        insert_at_head_Queue(cpu->process_queue, new_process);
+        new_process->next->is_running = false;
         return;
     }
 
-    if (compare_Processes(new_process, cpu->tail) > 0) 
-    {
-        new_process->prev = cpu->tail;
-        cpu->tail->next = new_process;
-        cpu->tail = new_process;
-        cpu->num_processes++;
-        return;
-    }
-
-    Process *curr = cpu->head;
+    Process_t *curr = cpu->process_queue->head;
     while (curr->next)
     {
         if (compare_Processes(new_process, curr->next) < 0)
@@ -73,47 +77,26 @@ add_Process_to_CPU(CPU *cpu, Process *new_process)
             curr->next->prev = new_process;
             new_process->prev = curr;
             curr->next = new_process;
-            cpu->num_processes++;
+            cpu->process_queue->size++;
             return;
         }
         curr = curr->next;
     }
     
-    exit_with_error("Error in add_Process_to_CPU(): failed to add process to CPU.");
+    fprintf(stderr, "Error in add_Process_to_CPU(): failed to add process to CPU.");
 }
 
-Process* 
+// Pops a process from the CPU queue without freeing it
+Process_t * 
 pop_Process_from_CPU(CPU *cpu) 
 {
     if (!cpu) exit_with_error("Error in pop_Process_from_CPU(): pointer given is NULL.");
-    if (!cpu->num_processes) exit_with_error("Error in pop_Process_from_CPU(): cannot pop an empty cpu.");
+    if (!cpu->process_queue->size) exit_with_error("Error in pop_Process_from_CPU(): cannot pop an empty queue.");
     
-    Process *process = cpu->head;
-    if (cpu->num_processes > 1) 
-    {
-        cpu->head = cpu->head->next;
-        cpu->head->prev = NULL;
-    }
-    else cpu->head = cpu->tail = NULL;
-    
-    cpu->num_processes--;
+    Process_t *process = pop_Queue(cpu->process_queue);
+    process->next = process->prev = NULL;
     return process;
 }
-
-void
-print_CPU(CPU *cpu)
-{
-    if (!cpu) exit_with_error("Error in print_CPU(): pointer given is NULL.");
-    printf("CPU number: %d \n", cpu->CPU_ID);
-    Process *curr = cpu->head;
-    while (curr) 
-    {
-        print_Process(curr);
-        curr = curr->next;
-    }
-}
-
-
 
 
 
@@ -134,7 +117,7 @@ new_CPU_Manager(unsigned int num_CPUs)
     cpu_manager->CPUs = (CPU**) malloc(sizeof(CPU*) * num_CPUs);
     if (!cpu_manager->CPUs) exit_with_error("Error in new_CPU_Manager(): failed to malloc CPUs.");
 
-    for (unsigned int i=0; i < num_CPUs; i++) 
+    for (unsigned int i=0; i<num_CPUs; i++) 
     { 
         cpu_manager->CPUs[i] = new_CPU(i); 
     }
@@ -147,7 +130,7 @@ void
 free_CPU_manager(CPU_Manager *cpu_manager) 
 {
     if (!cpu_manager) exit_with_error("Error in free_CPU_manager(): pointer given is NULL.");
-    for (unsigned int i=0; i < cpu_manager->num_CPUs; i++) 
+    for (unsigned int i=0; i<cpu_manager->num_CPUs; i++) 
     {
         free_CPU(cpu_manager->CPUs[i]);
         cpu_manager->CPUs[i] = NULL;
@@ -157,18 +140,54 @@ free_CPU_manager(CPU_Manager *cpu_manager)
     free(cpu_manager);
 }
 
-void run_CPUs(CPU_Manager *cpu_manager, unsigned int running_time) 
+void run_CPUs(CPU_Manager *cpu_manager, unsigned int current_time, unsigned int running_time) 
 {
     if (!cpu_manager) exit_with_error("Error in run_CPU(): pointer given is NULL.");
-    for (unsigned int i=0; i < cpu_manager->num_CPUs; i++) 
+    for (unsigned int i=0; i<cpu_manager->num_CPUs; i++) 
     {
         CPU *curr = cpu_manager->CPUs[i];
-        Process *top_process = curr->head;
-        if (top_process) execute_Process(top_process, running_time);
+        Process_t *top_process = curr->process_queue->head;
+        if (top_process) 
+        {
+            if (!top_process->is_running)
+            {
+                top_process->is_running = true;
+                print_Process_running(top_process, current_time, curr->CPU_ID);
+            }
+            execute_Process(top_process, running_time);
+        }
     }
 }
 
-void split_into_subprocesses(CPU **CPU_manager, Process* process) 
+unsigned int
+get_processes_remaining(CPU_Manager *cpu_manager) 
+{
+    if (!cpu_manager) exit_with_error("Error in get_processes_remaining(): pointer given is NULL.");
+    unsigned int processes_remaining = 0;
+    for (unsigned int i=0; i<cpu_manager->num_CPUs; i++) 
+    {
+        processes_remaining += cpu_manager->CPUs[i]->process_queue->size;
+    }
+    return processes_remaining;
+}
+
+long long int 
+get_shortest_CPU_running_time(CPU_Manager *cpu_manager)
+{
+    if (!cpu_manager) exit_with_error("Error in get_shortest_CPU_running_time(): pointer given is NULL.");
+    long long int shortest_time = -1;
+    for (unsigned int i=0; i<cpu_manager->num_CPUs; i++)
+    {
+        CPU *curr = cpu_manager->CPUs[i];
+        if (!curr->process_queue->size) continue;
+        if (shortest_time != -1 && shortest_time >= curr->process_queue->head->remaining_time) continue;
+            
+        shortest_time = curr->process_queue->head->remaining_time;
+    }
+    return shortest_time;
+}
+
+void split_into_subprocesses(CPU **CPU_manager, Process_t *process) 
 {
 
 }
