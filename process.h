@@ -66,11 +66,11 @@ print_Process_running(Process_t *process, unsigned int current_time, unsigned in
 
 
 void
-print_Process_finished(Process_t *process, unsigned int current_time, unsigned int processes_remaining) 
+print_Process_finished(Process_t *process, unsigned int processes_remaining) 
 {
     if (!process) exit_with_error("Error in print_Process_finished(): pointer given is NULL.");
     printf("%u,FINISHED,pid=%u,proc_remaining=%u\n", 
-    current_time, process->process_ID, processes_remaining);
+    process->time_finished, process->process_ID, processes_remaining);
 }
 
 void 
