@@ -6,6 +6,8 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
+/* A Process is the lowest level data structure in this program. Processes are nodes
+to a Queue. Queues can be part of CPUs. CPUs are part of CPU_Managers */
 typedef struct process Process_t;
 struct process 
 {
@@ -27,6 +29,7 @@ struct process
     unsigned int child_processes_remaining;
 };
 
+// Create and malloc a new process
 Process_t * 
 new_Process(unsigned int time_arrived, unsigned int process_ID, unsigned int execution_time) 
 {
@@ -43,6 +46,7 @@ new_Process(unsigned int time_arrived, unsigned int process_ID, unsigned int exe
     return process;
 }
 
+// Print the process [FOR TESTING]
 void
 print_Process(Process_t *process) 
 {
@@ -51,6 +55,7 @@ print_Process(Process_t *process)
     process->process_ID, process->time_arrived, process->execution_time,process->remaining_time);
 }
 
+// Print the RUNNING status for the process
 void
 print_Process_running(Process_t *process, unsigned int current_time) 
 {
@@ -60,7 +65,7 @@ print_Process_running(Process_t *process, unsigned int current_time)
     printf(",remaining_time=%u,cpu=%u\n", process->remaining_time, process->assigned_CPU);
 }
 
-
+// Print the FINISHED status for the process
 void
 print_Process_finished(Process_t *process, unsigned int processes_remaining) 
 {
@@ -70,6 +75,7 @@ print_Process_finished(Process_t *process, unsigned int processes_remaining)
     process->time_finished, process->process_ID, processes_remaining);
 }
 
+// free the process
 void 
 free_Process(Process_t *process) 
 {
@@ -80,6 +86,7 @@ free_Process(Process_t *process)
     free(process);
 }
 
+// takes a specified execution time off of the current remaining_time for a Process
 void 
 execute_Process(Process_t *process, unsigned int running_time) 
 {
@@ -91,6 +98,8 @@ execute_Process(Process_t *process, unsigned int running_time)
     process->remaining_time -= running_time;
 }
 
+// This function is used to compare 2 Processes, starting with remaining execution time, 
+// then process_ID, then subprocess_ID
 int
 compare_Processes(Process_t *process_1, Process_t *process_2) 
 {
@@ -109,9 +118,12 @@ compare_Processes(Process_t *process_1, Process_t *process_2)
     return 0;
 }
 
+// This function is used to compare 2 Processes, configured specifically to work with the
+// qsort() function.
 int 
 sort_compare_Processes(const void *process_1, const void *process_2)
 {
+    // change the pointers to Process_t pointers to work with compare_Processes()
     Process_t **p_1 = (Process_t **) process_1;
     Process_t **p_2 = (Process_t **) process_2;
     return compare_Processes(*p_1, *p_2);

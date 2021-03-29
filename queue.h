@@ -6,6 +6,8 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
+/* A queue is a list object that is mostly used for first in first out operations. 
+Queues will be used in this program to hold chains of processes. */
 typedef struct queue Queue_t;
 struct queue 
 {
@@ -59,6 +61,7 @@ insert_Queue(Queue_t *queue, Process_t *process)
     queue->size++;
 }
 
+// Add an element to the head of a queue
 void
 insert_at_head_Queue(Queue_t *queue, Process_t *process)
 {
@@ -106,7 +109,6 @@ void
 free_Queue(Queue_t *queue) 
 {
     if (!queue) exit_with_error("Error in free_Queue(): queue pointer is NULL.");
-    // if (queue->size) exit_with_error("Error in free_Queue(): freeing non-empty queue.");
 
     while(queue->size) 
     {
@@ -118,15 +120,20 @@ free_Queue(Queue_t *queue)
     free(queue);
 }
 
-
+// Sort the queue. This function uses the standard qsort() function to help sort Processes.
 Queue_t *
 sort_Queue(Queue_t *queue)
 {
     if (!queue) exit_with_error("Error in sort_Queue(): queue pointer is NULL.");
+
+    // If the queue is 0 or 1 elements, it is already sorted
     unsigned int width = queue->size;
     if (width <= 1) return queue;
 
+    // Create an array so we can use the qsort() function
     Process_t **array = (Process_t **) malloc(width * sizeof(Process_t*));
+
+    // Assign the Processes to the array
     Process_t *curr = queue->head;
     for (int i=0; i<width; i++)
     {
@@ -135,43 +142,19 @@ sort_Queue(Queue_t *queue)
     }
 
     qsort(array, width, sizeof(Process_t *), sort_compare_Processes);
+
+    // After sorting, we need to make sure that the pointers in the sorted list are correct.
     queue->head = array[0];
     queue->tail = array[width-1];
     queue->head->prev = NULL;
     queue->tail->next = NULL;
+
+    // set next and prev pointers to Processes to the right and left of each Process.
     for (int i = 0; i < width-1; i++) array[i]->next = array[i+1];
     for (int i = width-1; i > 1; i--) array[i]->prev = array[i-1];
+    
     free(array);
     return queue;
 }
-
-// Queue_t *
-// append_Queue_to_Queue(Queue_t *queue_1, Queue_t *queue_2)
-// {
-//     if (!queue_1 || !queue_2) exit_with_error("Error in append_Queue_to_Queue(): pointer given is NULL");
-
-//     // If queue_2 is empty, we can just return queue_1
-//     if (!queue_2->size)
-//     {
-//         free_Queue(queue_2);
-//         return queue_1;
-//     }
-
-//     // queue_2 is not empty
-//     // If queue_1 is empty, we turn queue_2 into queue_1
-//     if (!queue_1->size) { queue_1->head = queue_2->head; }
-//     // If queue_1 is not empty, we append queue_2 to the tail of queue_1
-//     else 
-//     {
-//         queue_1->tail->next = queue_2->head;
-//         queue_2->head->prev = queue_1->tail;
-//     }
-//     queue_1->tail = queue_2->tail;
-//     queue_1->size += queue_2->size;
-//     queue_2->head = queue_2->tail = NULL;
-//     free_Queue(queue_2);
-//     return queue_1;
-// }
-
 
 #endif
