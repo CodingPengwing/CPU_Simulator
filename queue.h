@@ -43,8 +43,10 @@ print_Queue(Queue_t *queue)
 void 
 insert_Queue(Queue_t *queue, Process_t *process) 
 {
-    if (!queue || !process) exit_with_error("Error in insert_Queue(): pointer given is NULL.");
-    process->next = process->prev = NULL;
+    if (!queue) exit_with_error("Error in insert_Queue(): queue pointer is NULL.");
+    if (!process) exit_with_error("Error in insert_Queue(): process pointer is NULL.");
+    process->next = NULL;
+    process->prev = NULL;
 
     if(queue->size) 
     {
@@ -52,8 +54,7 @@ insert_Queue(Queue_t *queue, Process_t *process)
         queue->tail->next = process;
         queue->tail = process;
     } 
-    else 
-        queue->head = queue->tail = process;
+    else queue->head = queue->tail = process;
 
     queue->size++;
 }
@@ -61,8 +62,10 @@ insert_Queue(Queue_t *queue, Process_t *process)
 void
 insert_at_head_Queue(Queue_t *queue, Process_t *process)
 {
-    if (!queue || !process) exit_with_error("Error in insert_at_head_Queue(): pointer given is NULL.");
-    process->next = process->prev = NULL;
+    if (!queue) exit_with_error("Error in insert_at_head_Queue(): queue pointer is NULL.");
+    if (!process) exit_with_error("Error in insert_at_head_Queue(): process pointer given is NULL.");
+    process->next = NULL;
+    process->prev = NULL;
 
     if(queue->size) 
     {
@@ -70,8 +73,7 @@ insert_at_head_Queue(Queue_t *queue, Process_t *process)
         queue->head->prev = process;
         queue->head = process;
     } 
-    else 
-        queue->head = queue->tail = process;
+    else queue->head = queue->tail = process;
 
     queue->size++;
 }
@@ -80,7 +82,7 @@ insert_at_head_Queue(Queue_t *queue, Process_t *process)
 Process_t *
 pop_Queue(Queue_t *queue) 
 {
-    if (!queue) exit_with_error("Error in pop_Queue()(): pointer given is NULL.");
+    if (!queue) exit_with_error("Error in pop_Queue()(): queue pointer is NULL.");
     if (queue->size == 0) 
         exit_with_error("Error in pop_Queue(): can't pop from empty queue.");
     
@@ -103,7 +105,9 @@ pop_Queue(Queue_t *queue)
 void 
 free_Queue(Queue_t *queue) 
 {
-    if (!queue) exit_with_error("Error in free_Queue(): pointer given is NULL.");
+    if (!queue) exit_with_error("Error in free_Queue(): queue pointer is NULL.");
+    // if (queue->size) exit_with_error("Error in free_Queue(): freeing non-empty queue.");
+
     while(queue->size) 
     {
         Process_t *process = pop_Queue(queue);
@@ -114,10 +118,11 @@ free_Queue(Queue_t *queue)
     free(queue);
 }
 
-////// TEST THIS!!!!!
+
 Queue_t *
 sort_Queue(Queue_t *queue)
 {
+    if (!queue) exit_with_error("Error in sort_Queue(): queue pointer is NULL.");
     unsigned int width = queue->size;
     if (width <= 1) return queue;
 

@@ -19,8 +19,6 @@ struct process
     bool is_subprocess;
     unsigned int subprocess_ID;
     unsigned int assigned_CPU;
-
-    unsigned int subproc_split_value;
     
     Process_t *next;
     Process_t *prev;
@@ -39,16 +37,11 @@ new_Process(unsigned int time_arrived, unsigned int process_ID, unsigned int exe
     process->execution_time = execution_time;
     process->remaining_time = execution_time;
     process->is_running = false;
+    process->is_subprocess = false;
     process->next = process->prev = process->parent_process = NULL;
 
     return process;
 }
-
-// Process *
-// new_subProcess(unsigned int time_arrived, unsigned int subprocess_ID, Process *parent_process) 
-// {
-
-// }
 
 void
 print_Process(Process_t *process) 

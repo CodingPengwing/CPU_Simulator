@@ -45,12 +45,10 @@ main(int argc, char *argv[])
     Queue_t *pending_queue = new_Queue();
     Queue_t *finished_queue = new_Queue();
 
-
     FILE *input_file = fopen(filename, "r");
     if (input_file == NULL) exit_with_error("Error: couldn't read file!");
     CPU_Manager *cpu_manager = new_CPU_Manager(processors);
     
-    Queue_t *test_queue = new_Queue();
     while (fscanf(input_file, "%d %d %d %c", &time_arrived, &process_ID, &execution_time, &parallelisable) == 4) 
     {
         while (current_time != time_arrived)
@@ -81,14 +79,18 @@ main(int argc, char *argv[])
         Process_t *new_process = new_Process(time_arrived, process_ID, execution_time);
         total_processes++;
         processes_remaining++;
-        if (parallelisable == IS_PARALELLISABLE) 
+
+        if (processors == 1 || parallelisable != IS_PARALELLISABLE)
+        {
+            insert_Queue(pending_queue, new_process);
+            continue;
+        }
+        else
         {
             unsigned int k = processors;
-            if (execution_time < k) k = execution_time;
+            if (execution_time >= 2 && execution_time < k) k = execution_time;
             split_into_subprocesses(cpu_manager, new_process, k);
-        }
-        else insert_Queue(pending_queue, new_process);
-        
+        }        
     }
 
 
@@ -120,7 +122,7 @@ main(int argc, char *argv[])
 
     fclose(input_file);
     free_CPU_manager(cpu_manager);
-    // free_Queue(pending_queue);
+    free_Queue(pending_queue);
     free_Queue(finished_queue);
 
     return EXIT_SUCCESS;

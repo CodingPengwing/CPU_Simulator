@@ -220,6 +220,7 @@ find_lightest_load_CPU(CPU_Manager *cpu_manager, int *exclusion_list, unsigned i
             lightest_cpu = curr;
         }
     }
+    if (!lightest_cpu) exit_with_error("Error in find_lightest_load_CPU(): could not find CPU.");
     return lightest_cpu;
 }
 
@@ -241,11 +242,10 @@ split_into_subprocesses(CPU_Manager *cpu_manager, Process_t *process, unsigned i
         subprocess->is_subprocess = true;
         subprocess->parent_process = process;
         subprocess->subprocess_ID = i;
-        subprocess->subproc_split_value = k;
         insert_Queue(subprocesses, subprocess);
     }
 
-    if (k == 2) 
+    if (cpu_manager->num_CPUs == 2) 
     {
         Process_t *subproc_1 = pop_Queue(subprocesses);
         assign_Process_to_CPU(cpu_manager->CPUs[0], subproc_1);
@@ -287,9 +287,14 @@ pop_finished_processes(CPU_Manager *cpu_manager, Queue_t *finished_queue, unsign
         if (curr->process_queue->head->remaining_time) continue;
         Process_t *finished_process = pop_Process_from_CPU(curr);
         finished_process->time_finished = current_time;
-        if (finished_process->is_subprocess)
+        if (!finished_process->is_subprocess)
         {
-            finished_process->parent_process->child_processes_remaining--;
+            insert_Queue(finished_queue, finished_process);
+            *ptr_processes_remaining -= 1;
+        }
+        else 
+        {
+            finished_process->parent_process->child_processes_remaining -= 1;
             if (!finished_process->parent_process->child_processes_remaining)
             {
                 finished_process->parent_process->time_finished = current_time;
@@ -297,11 +302,6 @@ pop_finished_processes(CPU_Manager *cpu_manager, Queue_t *finished_queue, unsign
                 *ptr_processes_remaining -= 1;
             }
             free_Process(finished_process);
-        }
-        else 
-        {
-            insert_Queue(finished_queue, finished_process);
-            *ptr_processes_remaining -= 1;
         }
     }
 }
