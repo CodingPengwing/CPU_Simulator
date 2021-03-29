@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 #include "util.h"
 #include "process.h"
 #include "CPU.h"
-#include "math.h"
+#include "CPU_manager.h"
 
 #define F_PARAMETER "-f"
 #define P_PARAMETER "-p"

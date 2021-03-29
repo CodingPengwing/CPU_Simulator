@@ -6,8 +6,8 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
-/* A queue is a list object that is mostly used for first in first out operations. 
-Queues will be used in this program to hold chains of processes. */
+/* A queue is a list object that is used as a priority queue for CPUs and a normal list 
+for other operations. Queues will be used in this program to hold chains of processes. */
 typedef struct queue Queue_t;
 struct queue 
 {
@@ -152,7 +152,7 @@ sort_Queue(Queue_t *queue)
     // set next and prev pointers to Processes to the right and left of each Process.
     for (int i = 0; i < width-1; i++) array[i]->next = array[i+1];
     for (int i = width-1; i > 1; i--) array[i]->prev = array[i-1];
-    
+
     free(array);
     return queue;
 }
