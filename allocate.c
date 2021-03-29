@@ -112,9 +112,8 @@ main(int argc, char *argv[])
         }        
     }
 
-    // --- Repeat the above while loop until there are no more simulations to run --- //
+    // Repeat the above while loop until there are no more simulations to run
     assign_Process_Queue_to_CPUs(cpu_manager, pending_queue);
-
     while (processes_remaining || finished_queue->size)
     {   
         // Check for finished processes
@@ -138,16 +137,12 @@ main(int argc, char *argv[])
         current_time += running_time;
         pop_finished_processes(cpu_manager, finished_queue, current_time, ptr_processes_remaining);
     }
-    // ------------------------------------------------------------------------------ //
 
-    
     print_logistics(current_time, total_turnaround, total_processes, max_overhead, total_overhead);
-
     fclose(input_file);
     free_CPU_manager(cpu_manager);
     free_Queue(pending_queue);
     free_Queue(finished_queue);
-
     return EXIT_SUCCESS;
 }
 
