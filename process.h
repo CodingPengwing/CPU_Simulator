@@ -18,7 +18,9 @@ struct process
     bool is_running;
     bool is_subprocess;
     unsigned int subprocess_ID;
-    // unsigned int finish_time;
+    unsigned int assigned_CPU;
+
+    unsigned int subproc_split_value;
     
     Process_t *next;
     Process_t *prev;
@@ -57,11 +59,12 @@ print_Process(Process_t *process)
 }
 
 void
-print_Process_running(Process_t *process, unsigned int current_time, unsigned int CPU_ID) 
+print_Process_running(Process_t *process, unsigned int current_time) 
 {
     if (!process) exit_with_error("Error in print_Process_running(): pointer given is NULL.");
-    printf("%u,RUNNING,pid=%u,remaining_time=%u,cpu=%u\n", 
-    current_time, process->process_ID, process->remaining_time, CPU_ID);
+    printf("%u,RUNNING,pid=%u", current_time, process->process_ID);
+    if (process->is_subprocess) printf(".%u", process->subprocess_ID);
+    printf(",remaining_time=%u,cpu=%u\n", process->remaining_time, process->assigned_CPU);
 }
 
 
@@ -69,6 +72,7 @@ void
 print_Process_finished(Process_t *process, unsigned int processes_remaining) 
 {
     if (!process) exit_with_error("Error in print_Process_finished(): pointer given is NULL.");
+    if (process->is_subprocess) exit_with_error("Error in print_Process_finished(): process given is a subprocess.");
     printf("%u,FINISHED,pid=%u,proc_remaining=%u\n", 
     process->time_finished, process->process_ID, processes_remaining);
 }
@@ -105,8 +109,19 @@ compare_Processes(Process_t *process_1, Process_t *process_2)
     if (process_1->process_ID < process_2->process_ID) return -1;
     if (process_1->process_ID > process_2->process_ID) return +1;
 
+    if (process_1->subprocess_ID < process_2->subprocess_ID) return -1;
+    if (process_1->subprocess_ID > process_2->subprocess_ID) return +1;
+
     exit_with_error("Error in compare_Processes(): processes shouldn't be equal.");
     return 0;
+}
+
+int 
+sort_compare_Processes(const void *process_1, const void *process_2)
+{
+    Process_t **p_1 = (Process_t **) process_1;
+    Process_t **p_2 = (Process_t **) process_2;
+    return compare_Processes(*p_1, *p_2);
 }
 
 
