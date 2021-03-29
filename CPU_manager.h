@@ -8,6 +8,8 @@
 #ifndef CPU_MANAGER_H
 #define CPU_MANAGER_H
 
+#define UNDEFINED -1
+
 /* A CPU_manager manages all the CPUs that are in the program. Its functions run on a
 higher level and control all of the CPUs at a time. It provides functionality to delegate 
 Processes to CPUs and remove finished Processes from CPUs among other higher level tasks. */
@@ -81,12 +83,12 @@ long long int
 get_shortest_CPU_running_time(CPU_Manager *cpu_manager)
 {
     if (!cpu_manager) exit_with_error("Error in get_shortest_CPU_running_time(): pointer given is NULL.");
-    long long int shortest_time = -1;
+    long long int shortest_time = UNDEFINED;
     for (int i=0; i<cpu_manager->num_CPUs; i++)
     {
         CPU *curr = cpu_manager->CPUs[i];
         if (!curr->process_queue->size) continue;
-        if (shortest_time == -1 || shortest_time > curr->process_queue->head->remaining_time)
+        if (shortest_time == UNDEFINED || shortest_time > curr->process_queue->head->remaining_time)
             shortest_time = curr->process_queue->head->remaining_time;
     }
     return shortest_time;
@@ -98,7 +100,7 @@ CPU *
 find_lightest_load_CPU(CPU_Manager *cpu_manager, int *exclusion_list, unsigned int exclusion_list_len)
 {
     if (!cpu_manager) exit_with_error("Error in find_lightest_load_CPU(): pointer to cpu_manager is NULL.");
-    long long int lightest_load = -1;
+    long long int lightest_load = UNDEFINED;
     CPU *lightest_cpu = NULL;
 
     for (int i=0; i<cpu_manager->num_CPUs; i++)
@@ -119,7 +121,7 @@ find_lightest_load_CPU(CPU_Manager *cpu_manager, int *exclusion_list, unsigned i
         if (excluded) continue;
 
         // CPU has not been excluded, evaluate whether is has the lightest load
-        if (lightest_load == -1 || lightest_load > curr->load_remaining_time)
+        if (lightest_load == UNDEFINED || lightest_load > curr->load_remaining_time)
         {
             lightest_load = curr->load_remaining_time;
             lightest_cpu = curr;
@@ -167,7 +169,7 @@ split_into_subprocesses(CPU_Manager *cpu_manager, Process_t *process, unsigned i
     {
         // Make an exclusion list for any CPUs that have already been assigned to
         int *exclusion_list = (int*) malloc(k * sizeof(int));
-        for (int i=0; i<k; i++) exclusion_list[i] = -1;
+        for (int i=0; i<k; i++) exclusion_list[i] = UNDEFINED;
 
         // Assign all subprocesses to unique CPUs
         while (subprocesses->size)
@@ -179,7 +181,7 @@ split_into_subprocesses(CPU_Manager *cpu_manager, Process_t *process, unsigned i
             // add CPU_ID to exclusion list
             for (int i=0; i<k; i++) 
             {
-                if (exclusion_list[i] == -1) 
+                if (exclusion_list[i] == UNDEFINED) 
                 {
                     exclusion_list[i] = cpu->CPU_ID;
                     break;
