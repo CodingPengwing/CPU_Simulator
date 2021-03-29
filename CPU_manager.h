@@ -235,7 +235,6 @@ pop_finished_processes(CPU_Manager *cpu_manager, Queue_t *finished_queue, unsign
 void
 assign_Process_Queue_to_CPUs(CPU_Manager *cpu_manager, Queue_t *pending_queue)
 {
-    pending_queue = sort_Queue(pending_queue);
     while (pending_queue->size)
     {
         Process_t *process = pop_Queue(pending_queue);

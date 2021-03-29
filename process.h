@@ -121,12 +121,23 @@ compare_Processes(Process_t *process_1, Process_t *process_2)
 // This function is used to compare 2 Processes, configured specifically to work with the
 // qsort() function.
 int 
-sort_compare_Processes(const void *process_1, const void *process_2)
+sort_Processes(const void *process_1, const void *process_2)
 {
     // change the pointers to Process_t pointers to work with compare_Processes()
     Process_t **p_1 = (Process_t **) process_1;
     Process_t **p_2 = (Process_t **) process_2;
     return compare_Processes(*p_1, *p_2);
+}
+
+// This function is used to compare 2 Processes, configured specifically to work with the
+// qsort() function. Sorts in biggest to smallest fashion.
+int 
+reverse_sort_Processes(const void *process_1, const void *process_2)
+{
+    // change the pointers to Process_t pointers to work with compare_Processes()
+    Process_t **p_1 = (Process_t **) process_1;
+    Process_t **p_2 = (Process_t **) process_2;
+    return -compare_Processes(*p_1, *p_2);
 }
 
 

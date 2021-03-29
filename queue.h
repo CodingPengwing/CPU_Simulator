@@ -122,7 +122,7 @@ free_Queue(Queue_t *queue)
 
 // Sort the queue. This function uses the standard qsort() function to help sort Processes.
 Queue_t *
-sort_Queue(Queue_t *queue)
+sort_Queue(Queue_t *queue, int compare(const void*, const void*))
 {
     if (!queue) exit_with_error("Error in sort_Queue(): queue pointer is NULL.");
 
@@ -141,7 +141,7 @@ sort_Queue(Queue_t *queue)
         curr = curr->next;
     }
 
-    qsort(array, width, sizeof(Process_t *), sort_compare_Processes);
+    qsort(array, width, sizeof(Process_t *), compare);
 
     // After sorting, we need to make sure that the pointers in the sorted list are correct.
     queue->head = array[0];
