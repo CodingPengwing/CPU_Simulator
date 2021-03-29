@@ -1,8 +1,8 @@
 allocate: allocate.c
-	gcc -o allocate allocate.c
+	gcc -o allocate allocate.c -lm
 
 clean:
-	rm allocate
+	rm -f allocate
 
 run_task1_1:
 	./allocate -p 1 -f testcases/task1/input/test_p1_n_1.txt 
