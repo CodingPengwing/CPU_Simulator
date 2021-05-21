@@ -1,3 +1,7 @@
+/*
+This needs improvement, current it has almost identical behaviour (code) to main function in allocate.c
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -9,38 +13,10 @@
 #include "CPU_manager.h"
 #include "custom_scheduler.h"
 
-#define F_PARAMETER "-f"
-#define P_PARAMETER "-p"
-#define C_PARAMETER "-c"
-#define IS_PARALELLISABLE 'p'
-#define UNDEFINED -1
 
-void
-print_logistics(unsigned int makespan, unsigned long int total_turnaround, 
-                unsigned int total_processes, float max_overhead, double total_overhead);
-
-int 
-main(int argc, char *argv[]) 
+int
+custom_scheduler(char *filename, int processors) 
 {
-    char *filename;
-    unsigned int processors;
-    bool use_custom_scheduler;
-
-    // get command line input arguments
-    for (int i = 0; i < argc; i++) 
-    {
-        if (strcmp(argv[i], C_PARAMETER) == 0) {use_custom_scheduler = true;}
-        if (i == argc-1) break;
-        if (strcmp(argv[i], F_PARAMETER) == 0) {filename = argv[i+1];}
-        if (strcmp(argv[i], P_PARAMETER) == 0) {processors = (unsigned int) strtoul(argv[i+1], NULL, 0);}
-    }
-
-    if (use_custom_scheduler) 
-    {
-        custom_scheduler(filename, processors);
-        return EXIT_SUCCESS;
-    }
-    
     unsigned int current_time = 0;
     unsigned long int total_turnaround = 0;
     unsigned int total_processes = 0;
@@ -69,7 +45,7 @@ main(int argc, char *argv[])
         while (current_time != time_arrived)
         {
             // assign any pending Processes to CPUs
-            pending_queue = sort_Queue(pending_queue, sort_Processes);
+            pending_queue = sort_Queue(pending_queue, reverse_sort_Processes);
             assign_Process_Queue_to_CPUs(cpu_manager, pending_queue);
             
             // if there are any finished processes, print the FINISHED status and keep track of statistics
@@ -121,7 +97,7 @@ main(int argc, char *argv[])
     }
 
     // Repeat the above while loop until there are no more simulations to run
-    pending_queue = sort_Queue(pending_queue, sort_Processes);
+    pending_queue = sort_Queue(pending_queue, reverse_sort_Processes);
     assign_Process_Queue_to_CPUs(cpu_manager, pending_queue);
     while (processes_remaining || finished_queue->size)
     {   
@@ -152,5 +128,6 @@ main(int argc, char *argv[])
     free_CPU_manager(cpu_manager);
     free_Queue(pending_queue);
     free_Queue(finished_queue);
+
     return EXIT_SUCCESS;
 }

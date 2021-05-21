@@ -1,1 +1,0 @@
-The custom scheduler sorts processes in reverse order (biggest to smallest) before they are assigned to CPUs. Better makespan because bigger processes will be allocated to the most free CPUs, and smaller processes will then fill up the remaining gaps, resulting in lower concurrent execution time.

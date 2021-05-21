@@ -1,60 +1,36 @@
-allocate: allocate.c
-	gcc -o allocate allocate.c -lm
+# This file is referenced from sample files provided to students as part of project 2 Comp30023 Melbourne University 2021.
+# This file contains all the logic required to compile and run the program, as well as clean afterwards.
 
+# CC - compiler
+CC=gcc
+# OBJ - compiled source files that should be linked
+OBJ=process.o queue.o CPU.o CPU_manager.o util.o custom_scheduler.o
+# COPT - compiler flags
+COPT=-Wall -Wpedantic -g 
+# BIN - binary
+BIN_MAIN=allocate
+
+# Running "make" with no argument will make the first target in the file
+all: $(BIN_MAIN)
+
+# Rules of the form
+#     target_to_be_made : dependencies_to_be_up-to-date_first
+#     <tab>commands_to_make_target
+# (Note that spaces will not work.)
+
+$(BIN_MAIN): allocate.c $(OBJ)
+	$(CC) -o $(BIN_MAIN) allocate.c $(OBJ) $(COPT) -lm
+
+
+# Wildcard rule to make any .o file,
+# given a .c and .h file with the same leading filename component
+%.o: %.c %.h
+	$(CC) -c $< $(COPT) -g
+
+format:
+	clang-format -i *.c *.h
+
+.PHONY: clean
 clean:
-	rm -f allocate
+	rm -f allocate *.o
 
-run_task1_1:
-	./allocate -p 1 -f testcases/task1/input/test_p1_n_1.txt 
-#| diff - testcases/task1/output/test_p1_n_1.out
-run_task1_2:
-	./allocate -p 1 -f testcases/task1/input/test_p1_n_2.txt 
-#| diff - testcases/task1/output/test_p1_n_2.out
-run_task2_1:
-	./allocate -p 2 -f testcases/task2/input/test_p2_n_1.txt 
-# | diff - testcases/task2/output/test_p2_n_1.out
-run_task2_2:
-	./allocate -p 2 -f testcases/task2/input/test_p2_n_2.txt 
-# | diff - testcases/task2/output/test_p2_n_2.out
-run_task3_1:
-	./allocate -p 2 -f testcases/task3/input/test_p2_p_1.txt 
-# | diff - testcases/task3/output/test_p2_p_1.out
-run_task3_2:
-	./allocate -p 2 -f testcases/task3/input/test_p2_p_2.txt 
-# | diff - testcases/task3/output/test_p2_p_2.out
-run_task4_1:
-	./allocate -p 4 -f testcases/task4/input/test_p4_n_1.txt 
-# | diff - testcases/task4/output/test_p4_n_1.out
-run_task4_2:
-	./allocate -p 4 -f testcases/task4/input/test_p4_n_2.txt 
-# | diff - testcases/task4/output/test_p4_n_2.out
-run_task5_1:
-	./allocate -p 4 -f testcases/task5/input/test_p4_p_1.txt 
-# | diff - testcases/task5/output/test_p4_p_1.out
-run_task5_2:
-	./allocate -p 4 -f testcases/task5/input/test_p4_p_2.txt 
-# | diff - testcases/task5/output/test_p4_p_2.out
-run_task6_1:
-	./allocate -p 1 -f testcases/task6/input/test_p1_n_1.txt 
-# | diff - testcases/task6/output/test_p1_n_1.out
-run_task6_2:
-	./allocate -p 4 -f testcases/task6/input/test_p4_p_2.txt 
-# | diff - testcases/task6/output/test_p4_p_2.out
-run_task7_1:
-	./allocate -p 2 -f testcases/task7/test_chal_p2_n.txt -c
-run_task7_2:
-	./allocate -p 2 -f testcases/task7/test_chal_p2_p.txt -c
-run_task7_3:
-	./allocate -p 3 -f testcases/task7/test_chal_p3_p.txt -c
-run_task7_4:
-	./allocate -p 4 -f testcases/task7/test_chal_p4_n.txt -c
-run_task7_5:
-	./allocate -p 4 -f testcases/task7/test_chal_p4_p.txt -c
-run_task7_6:
-	./allocate -p 5 -f testcases/task7/test_chal_p5_n.txt -c
-run_task7_7:
-	./allocate -p 5 -f testcases/task7/test_chal_p5_p.txt -c
-run_task7_8:
-	./allocate -p 6 -f testcases/task7/test_chal_p6_n_equal.txt -c
-run_task7_9:
-	./allocate -p 6 -f testcases/task7/test_chal_p6_p_equal.txt -c
