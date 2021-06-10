@@ -18,8 +18,8 @@ all: $(BIN_MAIN)
 #     <tab>commands_to_make_target
 # (Note that spaces will not work.)
 
-$(BIN_MAIN): allocate.c $(OBJ)
-	$(CC) -o $(BIN_MAIN) allocate.c $(OBJ) $(COPT) -lm
+$(BIN_MAIN): $(BIN_MAIN).c $(OBJ)
+	$(CC) -o $(BIN_MAIN) $(BIN_MAIN).c $(OBJ) $(COPT) -lm
 
 
 # Wildcard rule to make any .o file,
@@ -32,5 +32,5 @@ format:
 
 .PHONY: clean
 clean:
-	rm -f allocate *.o
+	rm -f $(BIN_MAIN) *.o
 
