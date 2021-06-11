@@ -1,4 +1,4 @@
-# ProcessSchedulerSimulation #
+# Process Scheduling Simulator #
 
 This program is a solution to project 1 of COMP30023 Computer Systems, University
 of Melbourne. The specifications can be found in the repo.
