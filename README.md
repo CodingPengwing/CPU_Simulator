@@ -22,6 +22,7 @@ the program outputs 3 general statistics:
 
 Run instructions:
 - make
+
 Then use the following run commands to see the output for each test input file.
 
 RUN COMMANDS:
