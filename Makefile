@@ -32,5 +32,5 @@ format:
 
 .PHONY: clean
 clean:
-	rm -f $(BIN_MAIN) *.o
+	rm -rf $(BIN_MAIN) $(BIN_MAIN).exe *.o *.dSYM
 
