@@ -1,8 +1,9 @@
 This program is a solution to project 1 of COMP30023 Computer Systems, University
 of Melbourne. The specifications can be found in the repo.
 
-This program is a simulation of a process scheduler for a CPU. The program 
-takes 2 inputs through command line: -f *filename* -p *processors*
+This program is a simulation of a process scheduler in a CPU, based on the 
+shortest-time-remaining process scheduling algorithm.. The program takes 2 inputs 
+through command line: -f *filename* -p *processors*
 
 This tells the program where to read input from and how many processors in the
 CPU it should simulate. The program then reads the input file line by line,
